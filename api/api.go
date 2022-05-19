@@ -44,17 +44,20 @@ func SendMessage(c *fiber.Ctx) error {
 
 	ch := queue.Connect()
 	var res entity.Response
-	res.Result = "Mensagem incluida na fila com sucesso!!"
 
 	message := new(entity.Message)
 
 	if err := c.BodyParser(message); err != nil {
-		var res entity.Response
 		res.Result = "Erro no parsing do json!!"
 		return c.Status(400).JSON(res)
 	}
 
-	queue.QueueMessage(ch, string(c.Body()))
+	if !queue.QueueMessage(ch, string(c.Body())) {
+		res.Result = "Houve eum erro ao inserir a mensagem na fila!!"
+		return c.Status(500).JSON(res)
 
+	}
+
+	res.Result = "Mensagem incluida na fila com sucesso!!"
 	return c.Status(201).JSON(res)
 }

@@ -60,7 +60,7 @@ func StartConsumer(ch *amqp.Channel) {
 	<-forever
 }
 
-func QueueMessage(ch *amqp.Channel, body string) {
+func QueueMessage(ch *amqp.Channel, body string) bool {
 
 	err := ch.Publish(
 		os.Getenv("RABBITMQ_DESTINATION"),
@@ -73,7 +73,12 @@ func QueueMessage(ch *amqp.Channel, body string) {
 		},
 	)
 
-	FailOnError(err, "Erro ao publicar mensagem!!")
+	if err != nil {
+		FailOnError(err, "Erro ao publicar mensagem!!")
+		return false
+	}
+
+	return true
 }
 
 func FailOnError(err error, msg string) {
