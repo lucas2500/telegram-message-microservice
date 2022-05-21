@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"telegram-message-microservice/entity"
 	"telegram-message-microservice/queue"
 
@@ -25,7 +26,7 @@ func main() {
 	app.Get("/", Hello)
 	SetupRoutes(app)
 
-	app.Listen(":3001")
+	app.Listen(":" + os.Getenv("API_HTTP_PORT"))
 }
 
 func SetupRoutes(app *fiber.App) {
