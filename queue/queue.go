@@ -60,7 +60,7 @@ func StartConsumer(ch *amqp.Channel) {
 	<-forever
 }
 
-func QueueMessage(ch *amqp.Channel, body string) bool {
+func QueueMessage(ch *amqp.Channel, body []byte) bool {
 
 	err := ch.Publish(
 		os.Getenv("RABBITMQ_DESTINATION"),
@@ -69,7 +69,7 @@ func QueueMessage(ch *amqp.Channel, body string) bool {
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body:        []byte(body),
+			Body:        body,
 		},
 	)
 

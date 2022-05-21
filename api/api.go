@@ -52,10 +52,9 @@ func SendMessage(c *fiber.Ctx) error {
 		return c.Status(400).JSON(res)
 	}
 
-	if !queue.QueueMessage(ch, string(c.Body())) {
+	if !queue.QueueMessage(ch, c.Body()) {
 		res.Result = "Houve eum erro ao inserir a mensagem na fila!!"
 		return c.Status(500).JSON(res)
-
 	}
 
 	res.Result = "Mensagem incluida na fila com sucesso!!"
