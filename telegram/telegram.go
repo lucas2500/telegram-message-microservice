@@ -13,6 +13,8 @@ func SendMessageToTelegram(body []byte) {
 
 	var message entity.Message
 	var buttons []entity.Buttons
+	var ReplyMarkup entity.ReplyMarkup
+	var InlineKeyBoard []byte
 
 	err := json.Unmarshal(body, &message)
 
@@ -20,17 +22,20 @@ func SendMessageToTelegram(body []byte) {
 		log.Fatal(err, "Erro no parsing do json!!")
 	}
 
-	for i := range message.InlineKeyboard {
-		button := entity.Buttons{{Text: message.InlineKeyboard[i].Text, CallbackData: message.InlineKeyboard[i].CallbackData}}
-		buttons = append(buttons, button)
-	}
+	if len(message.InlineKeyboard) > 0 {
 
-	ReplyMarkup := entity.ReplyMarkup{Buttons: buttons}
+		for i := range message.InlineKeyboard {
+			button := entity.Buttons{{Text: message.InlineKeyboard[i].Text, CallbackData: message.InlineKeyboard[i].CallbackData}}
+			buttons = append(buttons, button)
+		}
 
-	InlineKeyBoard, err := json.Marshal(&ReplyMarkup)
+		ReplyMarkup = entity.ReplyMarkup{Buttons: buttons}
 
-	if err != nil {
-		log.Fatal(err, "Erro ao marshalar o json!!")
+		InlineKeyBoard, err = json.Marshal(&ReplyMarkup)
+
+		if err != nil {
+			log.Fatal(err, "Erro ao marshalar o json!!")
+		}
 	}
 
 	req, err := http.Get(os.Getenv("TELEGRAM_BASE_URL") + message.BotToken + "/" + os.Getenv("TELEGRAM_ROUTE") + "?chat_id=" + message.ChatId + "&text=" + message.Text + "&parse_mode=" + message.ParseMode + "&reply_markup=" + string(InlineKeyBoard))
