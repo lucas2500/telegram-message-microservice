@@ -12,7 +12,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"BotToken\": \"\",\r\n    \"ChatId\": \"\",\r\n    \"message\": \"\",\r\n    \"ParseMode\": \"html\"\r\n}",
+					"raw": "{\r\n    \"BotToken\": \"\",\r\n    \"ChatId\": \"\",\r\n    \"message\": \"\",\r\n    \"ParseMode\": \"html\",\r\n    \"Inline_Keyboard\": [\r\n        {\r\n            \"text\": \"A\",\r\n            \"callback_data\": \"A\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -21,7 +21,6 @@
 				},
 				"url": {
 					"raw": "http://localhost:3001/api/SendMessage",
-					"protocol": "http",
 					"host": [
 						"localhost"
 					],
