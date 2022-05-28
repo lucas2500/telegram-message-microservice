@@ -16,6 +16,6 @@ func init() {
 }
 
 func main() {
-	ch := queue.Connect()
-	queue.StartConsumer(ch)
+	conn := queue.Connect()
+	queue.StartConsumer(conn)
 }

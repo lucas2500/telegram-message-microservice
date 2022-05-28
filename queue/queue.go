@@ -9,20 +9,21 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func Connect() *amqp.Channel {
+func Connect() *amqp.Connection {
 
 	dsn := "amqp://" + os.Getenv("RABBITMQ_DEFAULT_USER") + ":" + os.Getenv("RABBITMQ_DEFAULT_PASS") + "@" + os.Getenv("RABBITMQ_DEFAULT_HOST") + ":" + os.Getenv("RABBITMQ_DEFAULT_PORT") + os.Getenv("RABBITMQ_DEFAULT_VHOST")
 	conn, err := amqp.Dial(dsn)
 
 	FailOnError(err, "Falha ao se conectar ao RBMQ!!")
 
-	ch, err := conn.Channel()
-	FailOnError(err, "Falha ao abrir canal!!")
-
-	return ch
+	return conn
 }
 
-func StartConsumer(ch *amqp.Channel) {
+func StartConsumer(conn *amqp.Connection) {
+
+	ch, ErrChan := conn.Channel()
+	FailOnError(ErrChan, "Falha ao abrir canal!!")
+
 	q, err := ch.QueueDeclare(
 		os.Getenv("RABBITMQ_CONSUMER_QUEUE"),
 		true,
@@ -44,6 +45,8 @@ func StartConsumer(ch *amqp.Channel) {
 		nil,
 	)
 
+	defer ch.Close()
+
 	FailOnError(err, "Falha ao registrar consumer!!")
 
 	var forever chan struct{}
@@ -60,7 +63,10 @@ func StartConsumer(ch *amqp.Channel) {
 	<-forever
 }
 
-func QueueMessage(ch *amqp.Channel, body []byte) bool {
+func QueueMessage(conn *amqp.Connection, body []byte) bool {
+
+	ch, ErrChan := conn.Channel()
+	FailOnError(ErrChan, "Falha ao abrir canal!!")
 
 	err := ch.Publish(
 		os.Getenv("RABBITMQ_DESTINATION"),
@@ -72,6 +78,8 @@ func QueueMessage(ch *amqp.Channel, body []byte) bool {
 			Body:        body,
 		},
 	)
+
+	defer ch.Close()
 
 	if err != nil {
 		FailOnError(err, "Erro ao publicar mensagem!!")
