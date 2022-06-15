@@ -10,8 +10,9 @@ Um microserviço para envio de mensagens ao Telegram escrito em Golang (Fiber Fr
 **RABBITMQ_DEFAULT_HOST**: Endereço do host do RabbitMQ\
 **RABBITMQ_DEFAULT_VHOST**: Virtual host do RabbitMQ\
 **RABBITMQ_DEFAULT_PORT**: Porta do RabbitMQ\
-**RABBITMQ_CONSUMER_QUEUE**: Fila do RabbitMQ\
-**RABBITMQ_DESTINATION**: Exchange do RabbitMQ\
+**RABBITMQ_QUEUE_NAME**: Nome da fila\
+**RABBITMQ_EXCHANGE_NAME**: Nome da exchange\
+**RABBITMQ_QUEUE_ROUTING_KEY**: Nome da routing key\
 **TELEGRAM_BASE_URL**: Base URL da API do Telegram\
 **TELEGRAM_ROUTE**: Rota da API do Telegram para envio de mensagens
 

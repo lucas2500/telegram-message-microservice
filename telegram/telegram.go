@@ -22,6 +22,7 @@ func SendMessageToTelegram(body []byte) {
 		log.Fatal(err, "Erro no parsing do json!!")
 	}
 
+	// Verifica se botões foram enviados no body
 	if len(message.InlineKeyboard) > 0 {
 
 		for i := range message.InlineKeyboard {
