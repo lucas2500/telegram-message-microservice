@@ -108,7 +108,6 @@ func QueueMessage(conn *amqp.Connection, body []byte) bool {
 
 func SetExchange(ch *amqp.Channel, exchange string) {
 
-	// Declara exchange
 	err := ch.ExchangeDeclare(
 		exchange,
 		"direct",
@@ -124,7 +123,6 @@ func SetExchange(ch *amqp.Channel, exchange string) {
 
 func SetQueue(ch *amqp.Channel) string {
 
-	// Declara fila
 	q, err := ch.QueueDeclare(
 		os.Getenv("RABBITMQ_QUEUE_NAME"),
 		true,
@@ -141,7 +139,6 @@ func SetQueue(ch *amqp.Channel) string {
 
 func SetQueueBind(ch *amqp.Channel, queue string, exchange string, RoutingKey string) {
 
-	// Realiza o bind da queue com a exchange
 	err := ch.QueueBind(
 		queue,
 		RoutingKey,
