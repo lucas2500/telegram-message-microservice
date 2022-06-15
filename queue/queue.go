@@ -25,7 +25,7 @@ func StartConsumer(conn *amqp.Connection) {
 	FailOnError(ErrChan, "Falha ao abrir canal!!")
 
 	q, err := ch.QueueDeclare(
-		os.Getenv("RABBITMQ_CONSUMER_QUEUE"),
+		os.Getenv("RABBITMQ_QUEUE_NAME"),
 		true,
 		false,
 		false,
@@ -54,6 +54,9 @@ func StartConsumer(conn *amqp.Connection) {
 	go func() {
 		for d := range msgs {
 			log.Printf("Nova mensagem recebida: %s", d.Body)
+
+			// Envia mensagem ao Telegram!!
+			// Aguarda dois segundos entre cada requisição para evitar HTTP 429 (Too many requests)
 			telegram.SendMessageToTelegram(d.Body)
 			time.Sleep(time.Second * 2)
 		}
@@ -65,12 +68,26 @@ func StartConsumer(conn *amqp.Connection) {
 
 func QueueMessage(conn *amqp.Connection, body []byte) bool {
 
-	ch, ErrChan := conn.Channel()
-	FailOnError(ErrChan, "Falha ao abrir canal!!")
+	exchange := os.Getenv("RABBITMQ_EXCHANGE_NAME")
+	RoutingKey := os.Getenv("RABBITMQ_QUEUE_ROUTING_KEY")
 
-	err := ch.Publish(
-		os.Getenv("RABBITMQ_DESTINATION"),
-		"",
+	// Abre canal com o broker
+	ch, err := conn.Channel()
+	FailOnError(err, "Falha ao abrir canal!!")
+
+	// Declara exchange
+	SetExchange(ch, exchange)
+
+	// Declara fila
+	queue := SetQueue(ch)
+
+	// Realiza o bind da exchange com a fila
+	SetQueueBind(ch, queue, exchange, RoutingKey)
+
+	// Publica a mensagem
+	err = ch.Publish(
+		exchange,
+		RoutingKey,
 		false,
 		false,
 		amqp.Publishing{
@@ -87,6 +104,53 @@ func QueueMessage(conn *amqp.Connection, body []byte) bool {
 	}
 
 	return true
+}
+
+func SetExchange(ch *amqp.Channel, exchange string) {
+
+	// Declara exchange
+	err := ch.ExchangeDeclare(
+		exchange,
+		"direct",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	FailOnError(err, "Falha ao declarar exchange!!")
+}
+
+func SetQueue(ch *amqp.Channel) string {
+
+	// Declara fila
+	q, err := ch.QueueDeclare(
+		os.Getenv("RABBITMQ_QUEUE_NAME"),
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	FailOnError(err, "Falha ao declarar fila!!")
+
+	return q.Name
+}
+
+func SetQueueBind(ch *amqp.Channel, queue string, exchange string, RoutingKey string) {
+
+	// Realiza o bind da queue com a exchange
+	err := ch.QueueBind(
+		queue,
+		RoutingKey,
+		exchange,
+		false,
+		nil,
+	)
+
+	FailOnError(err, "Falha ao realizar o bind da exchange com a fila!!")
 }
 
 func FailOnError(err error, msg string) {
