@@ -1,11 +1,38 @@
-version: '3.3'
+version: "3.3"
 services:
     rabbitmq:
         container_name: rbmq-server
+        hostname: rbmq-server
+        networks:
+            - my-net
         environment:
             - RABBITMQ_DEFAULT_USER=admin
             - RABBITMQ_DEFAULT_PASS=admin
         ports:
-            - '8080:15672'
-            - '5672:5672'
-        image: 'rabbitmq:3-management'
+            - 8080:15672
+            - 5672:5672
+        image: rabbitmq:3-management
+
+    api:
+        container_name: api
+        networks:
+            - my-net
+        ports:
+            - 3001:3001
+        image: lucas2500/teste2
+        depends_on:
+            - rabbitmq
+        restart: on-failure:5
+    
+    consumer:
+        container_name: consumer
+        networks:
+            - my-net
+        image: lucas2500/teste1
+        depends_on:
+            - rabbitmq
+        restart: on-failure:5
+
+networks:
+  my-net:
+    driver: bridge
