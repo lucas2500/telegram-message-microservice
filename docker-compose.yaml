@@ -19,7 +19,7 @@ services:
             - my-net
         ports:
             - 3001:3001
-        image: lucas2500/teste2
+        image: lucas2500/telegram-message-microservice-api
         depends_on:
             - rabbitmq
         restart: on-failure:5
@@ -28,11 +28,10 @@ services:
         container_name: consumer
         networks:
             - my-net
-        image: lucas2500/teste1
+        image: lucas2500/telegram-message-microservice-consumer
         depends_on:
             - rabbitmq
         restart: on-failure:5
 
 networks:
   my-net:
-    driver: bridge
