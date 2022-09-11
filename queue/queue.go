@@ -58,7 +58,7 @@ func StartConsumer(conn *amqp.Connection) {
 			// Envia mensagem ao Telegram!!
 			// Aguarda dois segundos entre cada requisição para evitar HTTP 429 (Too many requests)
 			telegram.SendMessageToTelegram(d.Body)
-			time.Sleep(time.Second * 2)
+			time.Sleep(2 * time.Second)
 		}
 	}()
 
