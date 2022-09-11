@@ -11,10 +11,12 @@ import (
 
 func SendMessageToTelegram(body []byte) {
 
-	var message entities.Message
-	var buttons []entities.Buttons
-	var ReplyMarkup entities.ReplyMarkup
-	var InlineKeyBoard []byte
+	var (
+		message        entities.Message
+		buttons        []entities.Buttons
+		ReplyMarkup    entities.ReplyMarkup
+		InlineKeyBoard []byte
+	)
 
 	err := json.Unmarshal(body, &message)
 
