@@ -47,8 +47,8 @@ func SendMessageToTelegram(body []byte) {
 
 	if req.StatusCode == 200 {
 		fmt.Println("Mensagem enviada ao Telegram com sucesso!!")
-	} else {
-		fmt.Println("Erro ao enviar mensagem ao Telegram!!")
-		fmt.Println(req.StatusCode)
+		return
 	}
+
+	fmt.Println("Erro ao enviar mensagem ao Telegram!!", "Status HTTP:", req.StatusCode)
 }
