@@ -1,4 +1,4 @@
-package entity
+package entities
 
 type Message struct {
 	BotToken       string `json:"BotToken"`

@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"os"
-	"telegram-message-microservice/entity"
+	"telegram-message-microservice/entities"
 	"telegram-message-microservice/queue"
 
 	"github.com/gofiber/fiber/v2"
@@ -35,7 +35,7 @@ func SetupRoutes(app *fiber.App) {
 
 func Hello(c *fiber.Ctx) error {
 
-	var res entity.Response
+	var res entities.Response
 	res.Result = "Hello!!"
 
 	return c.JSON(res)
@@ -46,9 +46,9 @@ func SendMessage(c *fiber.Ctx) error {
 	conn := queue.Connect()
 	defer conn.Close()
 
-	var res entity.Response
+	var res entities.Response
 
-	message := new(entity.Message)
+	message := new(entities.Message)
 
 	if err := c.BodyParser(message); err != nil {
 		res.Result = "Erro no parsing do json!!"

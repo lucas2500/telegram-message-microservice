@@ -6,14 +6,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"telegram-message-microservice/entity"
+	"telegram-message-microservice/entities"
 )
 
 func SendMessageToTelegram(body []byte) {
 
-	var message entity.Message
-	var buttons []entity.Buttons
-	var ReplyMarkup entity.ReplyMarkup
+	var message entities.Message
+	var buttons []entities.Buttons
+	var ReplyMarkup entities.ReplyMarkup
 	var InlineKeyBoard []byte
 
 	err := json.Unmarshal(body, &message)
@@ -26,11 +26,11 @@ func SendMessageToTelegram(body []byte) {
 	if len(message.InlineKeyboard) > 0 {
 
 		for i := range message.InlineKeyboard {
-			button := entity.Buttons{{Text: message.InlineKeyboard[i].Text, CallbackData: message.InlineKeyboard[i].CallbackData}}
+			button := entities.Buttons{{Text: message.InlineKeyboard[i].Text, CallbackData: message.InlineKeyboard[i].CallbackData}}
 			buttons = append(buttons, button)
 		}
 
-		ReplyMarkup = entity.ReplyMarkup{Buttons: buttons}
+		ReplyMarkup = entities.ReplyMarkup{Buttons: buttons}
 
 		InlineKeyBoard, err = json.Marshal(&ReplyMarkup)
 
