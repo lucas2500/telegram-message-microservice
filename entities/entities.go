@@ -11,10 +11,6 @@ type Message struct {
 	} `json:"Inline_Keyboard"`
 }
 
-type Response struct {
-	Result string `json:"result"`
-}
-
 type Buttons []struct {
 	Text         string `json:"text"`
 	CallbackData string `json:"callback_data"`

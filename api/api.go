@@ -3,8 +3,7 @@ package main
 import (
 	"log"
 	"os"
-	"telegram-message-microservice/entities"
-	"telegram-message-microservice/queue"
+	"telegram-message-microservice/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -23,43 +22,7 @@ func init() {
 func main() {
 
 	app := fiber.New()
-	app.Get("/", Hello)
-	SetupRoutes(app)
+	routes.SetupRoutes(app)
 
 	app.Listen(":" + os.Getenv("API_HTTP_PORT"))
-}
-
-func SetupRoutes(app *fiber.App) {
-	app.Post("api/SendMessage", SendMessage)
-}
-
-func Hello(c *fiber.Ctx) error {
-
-	var res entities.Response
-	res.Result = "Hello!!"
-
-	return c.JSON(res)
-}
-
-func SendMessage(c *fiber.Ctx) error {
-
-	conn := queue.Connect()
-	defer conn.Close()
-
-	var res entities.Response
-
-	message := new(entities.Message)
-
-	if err := c.BodyParser(message); err != nil {
-		res.Result = "Erro no parsing do json!!"
-		return c.Status(400).JSON(res)
-	}
-
-	if !queue.QueueMessage(conn, c.Body()) {
-		res.Result = "Houve eum erro ao inserir a mensagem na fila!!"
-		return c.Status(500).JSON(res)
-	}
-
-	res.Result = "Mensagem incluida na fila com sucesso!!"
-	return c.Status(201).JSON(res)
 }
