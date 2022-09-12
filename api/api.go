@@ -1,9 +1,9 @@
 package main
 
 import (
-	"log"
 	"os"
 	"telegram-message-microservice/routes"
+	"telegram-message-microservice/util"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -14,7 +14,7 @@ func init() {
 	err := godotenv.Load("../.env")
 
 	if err != nil {
-		log.Fatal(err, "Falha ao carregar .env!!")
+		util.FailOnError(err, "Falha ao carregar .env")
 	}
 
 }

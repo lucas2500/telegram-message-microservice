@@ -18,8 +18,6 @@ func Hello(c *fiber.Ctx) error {
 func SendMessage(c *fiber.Ctx) error {
 
 	response := make(map[string]string)
-	conn := queue.Connect()
-	defer conn.Close()
 
 	message := new(entities.Message)
 
@@ -28,7 +26,7 @@ func SendMessage(c *fiber.Ctx) error {
 		return c.Status(400).JSON(response)
 	}
 
-	if !queue.QueueMessage(conn, c.Body()) {
+	if !queue.QueueMessage(c.Body()) {
 		response["result"] = "Houve eum erro ao inserir a mensagem na fila!!"
 		return c.Status(500).JSON(response)
 	}

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
-	"telegram-message-microservice/queue"
+	"telegram-message-microservice/connections"
+	"telegram-message-microservice/util"
+	"telegram-message-microservice/worker"
 
 	"github.com/joho/godotenv"
 )
@@ -11,11 +12,11 @@ func init() {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatal(err, "Falha ao carregar .env!!")
+		util.FailOnError(err, "Falha ao carregar .env")
 	}
 }
 
 func main() {
-	conn := queue.Connect()
-	queue.StartConsumer(conn)
+	conn := connections.ConnectToRabbitMQ()
+	worker.StartConsumer(conn)
 }
