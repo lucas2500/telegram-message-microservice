@@ -7,6 +7,6 @@ import (
 )
 
 func SetupRoutes(app *fiber.App) {
-	app.Get("/", controllers.Hello)
+	app.Get("/", controllers.PingPong)
 	app.Post("api/SendMessage", controllers.SendMessage)
 }

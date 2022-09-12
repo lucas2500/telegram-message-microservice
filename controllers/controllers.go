@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Hello(c *fiber.Ctx) error {
+func PingPong(c *fiber.Ctx) error {
 
 	response := make(map[string]string)
 	response["Ping"] = "Pong"
