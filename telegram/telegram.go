@@ -3,10 +3,11 @@ package telegram
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"telegram-message-microservice/entities"
+	"telegram-message-microservice/queue"
+	"telegram-message-microservice/util"
 )
 
 func SendMessageToTelegram(body []byte) {
@@ -21,7 +22,7 @@ func SendMessageToTelegram(body []byte) {
 	err := json.Unmarshal(body, &message)
 
 	if err != nil {
-		log.Fatal(err, "Erro no parsing do json!!")
+		util.FailOnError(err, "Erro no parsing do json")
 	}
 
 	// Verifica se botões foram enviados no body
@@ -37,20 +38,59 @@ func SendMessageToTelegram(body []byte) {
 		InlineKeyBoard, err = json.Marshal(&ReplyMarkup)
 
 		if err != nil {
-			log.Fatal(err, "Erro ao marshalar o json!!")
+			util.FailOnError(err, "Erro ao serializar a mensagem")
 		}
 	}
 
-	req, err := http.Get(os.Getenv("TELEGRAM_BASE_URL") + message.BotToken + "/" + os.Getenv("TELEGRAM_ROUTE") + "?chat_id=" + message.ChatId + "&text=" + message.Text + "&parse_mode=" + message.ParseMode + "&reply_markup=" + string(InlineKeyBoard))
+	success := RequestTelegramAPI(message.BotToken, message.ChatId, message.Text, message.ParseMode, string(InlineKeyBoard))
+
+	// Case o envio da mensagem falhe e a mensagem esteja parametrizada para reenvio, novas tentativas serão feitas
+	if !success && message.RetryOnError {
+
+		fmt.Println("Houve uma falha na tentativa", message.RetryAttempt, "de envio da mensagem, uma nova será criada!!")
+
+		message.RetryAttempt++
+
+		if message.RetryAttempt < 100 {
+
+			fmt.Println("Criando tentativa", message.RetryAttempt, "de envio da mensagem!!")
+		}
+
+		fmt.Println("Número máximo de tentativas excedido!! A mensagem será descartada")
+	}
+}
+
+func RequestTelegramAPI(BotToken string, ChatId string, Text string, ParseMode string, InlineKeyBoard string) bool {
+
+	req, err := http.Get(os.Getenv("TELEGRAM_BASE_URL") + BotToken + "/" + os.Getenv("TELEGRAM_ROUTE") + "?chat_id=" + ChatId + "&text=" + Text + "&parse_mode=" + ParseMode + "&reply_markup=" + InlineKeyBoard)
 
 	if err != nil {
-		log.Fatal(err, "Erro ao enviar mensagem ao Telegram!!")
+		fmt.Println("Erro interno ao enviar mensagem ao Telegram!!")
+		return false
 	}
 
 	if req.StatusCode == 200 {
 		fmt.Println("Mensagem enviada ao Telegram com sucesso!!")
-		return
+		return true
 	}
 
 	fmt.Println("Erro ao enviar mensagem ao Telegram!!", "Status HTTP:", req.StatusCode)
+
+	return false
+}
+
+func GenerateNewMessage(message entities.Message) {
+
+	j, err := json.Marshal(message)
+
+	if err != nil {
+		util.FailOnError(err, "Erro ao serializar a mensagem")
+	}
+
+	if !queue.QueueMessage(j) {
+		fmt.Println("Houve um erro na criação da tentativa", message.RetryAttempt, "de envio da mensagem!!")
+		return
+	}
+
+	fmt.Println("Nova tentativa de envio criada com sucesso!!")
 }

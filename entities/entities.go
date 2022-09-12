@@ -9,6 +9,8 @@ type Message struct {
 		Text         string `json:"text"`
 		CallbackData string `json:"callback_data"`
 	} `json:"Inline_Keyboard"`
+	RetryAttempt int  `json:"RetryAttempt"`
+	RetryOnError bool `json:"RetryOnError"`
 }
 
 type Buttons []struct {
