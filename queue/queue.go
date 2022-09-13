@@ -1,85 +1,32 @@
 package queue
 
 import (
-	"log"
-	"os"
-	"telegram-message-microservice/telegram"
-	"time"
+	"telegram-message-microservice/connections"
+	"telegram-message-microservice/util"
 
 	"github.com/streadway/amqp"
 )
 
-func Connect() *amqp.Connection {
+func QueueMessage(body []byte, exchange string, RoutingKey string, queue string) bool {
 
-	dsn := "amqp://" + os.Getenv("RABBITMQ_DEFAULT_USER") + ":" + os.Getenv("RABBITMQ_DEFAULT_PASS") + "@" + os.Getenv("RABBITMQ_DEFAULT_HOST") + ":" + os.Getenv("RABBITMQ_DEFAULT_PORT") + os.Getenv("RABBITMQ_DEFAULT_VHOST")
-	conn, err := amqp.Dial(dsn)
+	// Abre conexão com o broker
+	conn := connections.ConnectToRabbitMQ()
 
-	FailOnError(err, "Falha ao se conectar ao RBMQ!!")
-
-	return conn
-}
-
-func StartConsumer(conn *amqp.Connection) {
-
-	ch, ErrChan := conn.Channel()
-	FailOnError(ErrChan, "Falha ao abrir canal!!")
-
-	q, err := ch.QueueDeclare(
-		os.Getenv("RABBITMQ_QUEUE_NAME"),
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-
-	FailOnError(err, "Falha ao declarar fila!!")
-
-	msgs, err := ch.Consume(
-		q.Name,
-		"telegram-consumer",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-
-	defer ch.Close()
-
-	FailOnError(err, "Falha ao registrar consumer!!")
-
-	var forever chan struct{}
-
-	go func() {
-		for d := range msgs {
-			log.Printf("Nova mensagem recebida: %s", d.Body)
-
-			// Envia mensagem ao Telegram!!
-			// Aguarda dois segundos entre cada requisição para evitar HTTP 429 (Too many requests)
-			telegram.SendMessageToTelegram(d.Body)
-			time.Sleep(time.Second * 2)
-		}
-	}()
-
-	log.Printf(" [*] Aguardando novas mensagens...")
-	<-forever
-}
-
-func QueueMessage(conn *amqp.Connection, body []byte) bool {
-
-	exchange := os.Getenv("RABBITMQ_EXCHANGE_NAME")
-	RoutingKey := os.Getenv("RABBITMQ_QUEUE_ROUTING_KEY")
+	// Fecha conexão aberta
+	defer conn.Close()
 
 	// Abre canal com o broker
 	ch, err := conn.Channel()
-	FailOnError(err, "Falha ao abrir canal!!")
+	util.FailOnError(err, "Falha ao abrir canal!!")
+
+	// Fecha canal aberto
+	defer ch.Close()
 
 	// Declara exchange
 	SetExchange(ch, exchange)
 
 	// Declara fila
-	queue := SetQueue(ch)
+	SetQueue(ch, queue)
 
 	// Realiza o bind da exchange com a fila
 	SetQueueBind(ch, queue, exchange, RoutingKey)
@@ -96,10 +43,8 @@ func QueueMessage(conn *amqp.Connection, body []byte) bool {
 		},
 	)
 
-	defer ch.Close()
-
 	if err != nil {
-		FailOnError(err, "Erro ao publicar mensagem!!")
+		util.FailOnError(err, "Erro ao publicar mensagem!!")
 		return false
 	}
 
@@ -118,13 +63,13 @@ func SetExchange(ch *amqp.Channel, exchange string) {
 		nil,
 	)
 
-	FailOnError(err, "Falha ao declarar exchange!!")
+	util.FailOnError(err, "Falha ao declarar exchange!!")
 }
 
-func SetQueue(ch *amqp.Channel) string {
+func SetQueue(ch *amqp.Channel, queue string) string {
 
 	q, err := ch.QueueDeclare(
-		os.Getenv("RABBITMQ_QUEUE_NAME"),
+		queue,
 		true,
 		false,
 		false,
@@ -132,7 +77,7 @@ func SetQueue(ch *amqp.Channel) string {
 		nil,
 	)
 
-	FailOnError(err, "Falha ao declarar fila!!")
+	util.FailOnError(err, "Falha ao declarar fila!!")
 
 	return q.Name
 }
@@ -147,11 +92,5 @@ func SetQueueBind(ch *amqp.Channel, queue string, exchange string, RoutingKey st
 		nil,
 	)
 
-	FailOnError(err, "Falha ao realizar o bind da exchange com a fila!!")
-}
-
-func FailOnError(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
-	}
+	util.FailOnError(err, "Falha ao realizar o bind da exchange com a fila!!")
 }

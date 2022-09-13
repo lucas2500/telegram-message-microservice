@@ -1,4 +1,4 @@
-package entity
+package entities
 
 type Message struct {
 	BotToken       string `json:"BotToken"`
@@ -9,10 +9,8 @@ type Message struct {
 		Text         string `json:"text"`
 		CallbackData string `json:"callback_data"`
 	} `json:"Inline_Keyboard"`
-}
-
-type Response struct {
-	Result string `json:"result"`
+	RetryAttempt int  `json:"RetryAttempt"`
+	RetryOnError bool `json:"RetryOnError"`
 }
 
 type Buttons []struct {

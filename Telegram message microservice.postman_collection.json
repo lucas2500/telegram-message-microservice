@@ -2,7 +2,8 @@
 	"info": {
 		"_postman_id": "d2500be0-9dcb-4097-822d-ee7c571d7ba8",
 		"name": "Telegram message microservice",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11500905"
 	},
 	"item": [
 		{
@@ -12,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"BotToken\": \"\",\r\n    \"ChatId\": \"\",\r\n    \"message\": \"\",\r\n    \"ParseMode\": \"html\",\r\n    \"Inline_Keyboard\": [\r\n        {\r\n            \"text\": \"A\",\r\n            \"callback_data\": \"A\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"BotToken\": \"\",\r\n    \"ChatId\": \"\",\r\n    \"message\": \"teste\",\r\n    \"ParseMode\": \"html\",\r\n    \"RetryAttempt\": 0,\r\n    \"RetryOnError\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -20,7 +21,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3001/api/SendMessage",
+					"raw": "localhost:3001/api/SendMessage",
 					"host": [
 						"localhost"
 					],
