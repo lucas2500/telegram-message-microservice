@@ -12,7 +12,10 @@ import (
 func StartConsumer(conn *amqp.Connection, queue string) {
 
 	ch, ErrChan := conn.Channel()
+
 	util.FailOnError(ErrChan, "Falha ao abrir canal!!")
+
+	defer ch.Close()
 
 	_, err := ch.QueueDeclare(
 		queue,
@@ -34,8 +37,6 @@ func StartConsumer(conn *amqp.Connection, queue string) {
 		false,
 		nil,
 	)
-
-	defer ch.Close()
 
 	util.FailOnError(err, "Falha ao registrar consumer!!")
 
