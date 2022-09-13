@@ -1,17 +1,13 @@
 package queue
 
 import (
-	"os"
 	"telegram-message-microservice/connections"
 	"telegram-message-microservice/util"
 
 	"github.com/streadway/amqp"
 )
 
-func QueueMessage(body []byte) bool {
-
-	exchange := os.Getenv("RABBITMQ_EXCHANGE_NAME")
-	RoutingKey := os.Getenv("RABBITMQ_QUEUE_ROUTING_KEY")
+func QueueMessage(body []byte, exchange string, RoutingKey string, queue string) bool {
 
 	// Abre conexão com o broker
 	conn := connections.ConnectToRabbitMQ()
@@ -30,7 +26,7 @@ func QueueMessage(body []byte) bool {
 	SetExchange(ch, exchange)
 
 	// Declara fila
-	queue := SetQueue(ch)
+	SetQueue(ch, queue)
 
 	// Realiza o bind da exchange com a fila
 	SetQueueBind(ch, queue, exchange, RoutingKey)
@@ -70,10 +66,10 @@ func SetExchange(ch *amqp.Channel, exchange string) {
 	util.FailOnError(err, "Falha ao declarar exchange!!")
 }
 
-func SetQueue(ch *amqp.Channel) string {
+func SetQueue(ch *amqp.Channel, queue string) string {
 
 	q, err := ch.QueueDeclare(
-		os.Getenv("RABBITMQ_QUEUE_NAME"),
+		queue,
 		true,
 		false,
 		false,

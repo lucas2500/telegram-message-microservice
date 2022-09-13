@@ -47,13 +47,15 @@ func SendMessageToTelegram(body []byte) {
 	// Case o envio da mensagem falhe e a mensagem esteja parametrizada para reenvio, novas tentativas serão feitas
 	if !success && message.RetryOnError {
 
-		fmt.Println("Houve uma falha na tentativa", message.RetryAttempt, "de envio da mensagem, uma nova será criada!!")
+		fmt.Println("Houve uma falha na tentativa", message.RetryAttempt, "de envio da mensagem!!")
 
 		message.RetryAttempt++
 
-		if message.RetryAttempt < 100 {
+		if message.RetryAttempt <= 500 {
 
 			fmt.Println("Criando tentativa", message.RetryAttempt, "de envio da mensagem!!")
+			CreateNewMessage(message)
+			return
 		}
 
 		fmt.Println("Número máximo de tentativas excedido!! A mensagem será descartada")
@@ -79,7 +81,7 @@ func RequestTelegramAPI(BotToken string, ChatId string, Text string, ParseMode s
 	return false
 }
 
-func GenerateNewMessage(message entities.Message) {
+func CreateNewMessage(message entities.Message) {
 
 	j, err := json.Marshal(message)
 
@@ -87,7 +89,11 @@ func GenerateNewMessage(message entities.Message) {
 		util.FailOnError(err, "Erro ao serializar a mensagem")
 	}
 
-	if !queue.QueueMessage(j) {
+	exchange := os.Getenv("RABBITMQ_EXCHANGE_NAME")
+	RoutingKey := os.Getenv("RABBITMQ_DLQ_ROUTING_KEY")
+	QueueName := os.Getenv("RABBITMQ_DLQ_NAME")
+
+	if !queue.QueueMessage(j, exchange, RoutingKey, QueueName) {
 		fmt.Println("Houve um erro na criação da tentativa", message.RetryAttempt, "de envio da mensagem!!")
 		return
 	}
