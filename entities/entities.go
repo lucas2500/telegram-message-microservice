@@ -1,5 +1,12 @@
 package entities
 
+type QueueProperties struct {
+	Exchange   string
+	RoutingKey string
+	Queue      string
+	DLX        map[string]interface{}
+}
+
 type Message struct {
 	BotToken       string `json:"BotToken"`
 	ChatId         string `json:"ChatId"`
@@ -9,8 +16,8 @@ type Message struct {
 		Text         string `json:"text"`
 		CallbackData string `json:"callback_data"`
 	} `json:"Inline_Keyboard"`
-	RetryAttempt int  `json:"RetryAttempt"`
-	RetryOnError bool `json:"RetryOnError"`
+	RetryAttempt int   `json:"RetryAttempt"`
+	RetryOnError *bool `json:"RetryOnError"`
 }
 
 type Buttons []struct {

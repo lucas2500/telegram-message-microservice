@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"telegram-message-microservice/connections"
 	"telegram-message-microservice/routes"
 	"telegram-message-microservice/util"
 
@@ -16,13 +17,16 @@ func init() {
 	if err != nil {
 		util.FailOnError(err, "Falha ao carregar .env")
 	}
-
 }
 
 func main() {
 
+	conn := connections.ConnectToRabbitMQ()
+	connections.RabbitConn = conn
+
+	defer conn.Close()
+
 	app := fiber.New()
 	routes.SetupRoutes(app)
-
 	app.Listen(":" + os.Getenv("API_HTTP_PORT"))
 }

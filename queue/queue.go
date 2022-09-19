@@ -2,18 +2,16 @@ package queue
 
 import (
 	"telegram-message-microservice/connections"
+	"telegram-message-microservice/entities"
 	"telegram-message-microservice/util"
 
 	"github.com/streadway/amqp"
 )
 
-func QueueMessage(body []byte, exchange string, RoutingKey string, queue string) bool {
+func QueueMessage(body []byte, qp entities.QueueProperties) bool {
 
-	// Abre conexão com o broker
-	conn := connections.ConnectToRabbitMQ()
-
-	// Fecha conexão aberta
-	defer conn.Close()
+	// Obtem conexão aberta com o RabbitMQ
+	conn := connections.RabbitConn
 
 	// Abre canal com o broker
 	ch, err := conn.Channel()
@@ -23,18 +21,18 @@ func QueueMessage(body []byte, exchange string, RoutingKey string, queue string)
 	defer ch.Close()
 
 	// Declara exchange
-	SetExchange(ch, exchange)
+	SetExchange(ch, qp.Exchange)
 
 	// Declara fila
-	SetQueue(ch, queue)
+	SetQueue(ch, qp.Queue, qp.DLX)
 
 	// Realiza o bind da exchange com a fila
-	SetQueueBind(ch, queue, exchange, RoutingKey)
+	SetQueueBind(ch, qp.Queue, qp.Exchange, qp.RoutingKey)
 
 	// Publica a mensagem
 	err = ch.Publish(
-		exchange,
-		RoutingKey,
+		qp.Exchange,
+		qp.RoutingKey,
 		false,
 		false,
 		amqp.Publishing{
@@ -66,7 +64,7 @@ func SetExchange(ch *amqp.Channel, exchange string) {
 	util.FailOnError(err, "Falha ao declarar exchange!!")
 }
 
-func SetQueue(ch *amqp.Channel, queue string) string {
+func SetQueue(ch *amqp.Channel, queue string, DLX map[string]interface{}) string {
 
 	q, err := ch.QueueDeclare(
 		queue,
@@ -74,7 +72,7 @@ func SetQueue(ch *amqp.Channel, queue string) string {
 		false,
 		false,
 		false,
-		nil,
+		DLX,
 	)
 
 	util.FailOnError(err, "Falha ao declarar fila!!")

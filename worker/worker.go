@@ -49,7 +49,7 @@ func StartConsumer(conn *amqp.Connection, queue string) {
 		}
 	}()
 
-	fmt.Println("Inicializando worker da fila", queue)
+	fmt.Println("Inicializando worker da fila...", queue)
 	log.Printf(" [*] Aguardando novas mensagens...")
 	<-forever
 }
