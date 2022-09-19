@@ -23,10 +23,11 @@ func main() {
 	var wg sync.WaitGroup
 	Queue := os.Getenv("RABBITMQ_MESSAGE_QUEUE")
 	conn := connections.ConnectToRabbitMQ()
+	connections.RabbitConn = conn
 
 	defer conn.Close()
 
 	wg.Add(1)
-	go worker.StartConsumer(conn, Queue)
+	go worker.StartConsumer(Queue)
 	wg.Wait()
 }
