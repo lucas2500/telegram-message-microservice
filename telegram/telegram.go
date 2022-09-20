@@ -17,6 +17,7 @@ func SendMessageToTelegram(body []byte) {
 		buttons        []entities.Buttons
 		ReplyMarkup    entities.ReplyMarkup
 		InlineKeyBoard []byte
+		retry          bool = true
 	)
 
 	err := json.Unmarshal(body, &message)
@@ -44,8 +45,12 @@ func SendMessageToTelegram(body []byte) {
 
 	success := RequestTelegramAPI(message.BotToken, message.ChatId, message.Text, message.ParseMode, string(InlineKeyBoard))
 
+	if message.RetryOnError != nil {
+		retry = *message.RetryOnError
+	}
+
 	// Case o envio da mensagem falhe e a mensagem esteja parametrizada para reenvio, novas tentativas serão feitas
-	if !success && message.RetryOnError {
+	if !success && retry {
 
 		fmt.Println("Houve uma falha na tentativa", message.RetryAttempt, "de envio da mensagem!!")
 
@@ -89,11 +94,20 @@ func CreateNewMessage(message entities.Message) {
 		util.FailOnError(err, "Erro ao serializar a mensagem")
 	}
 
-	exchange := os.Getenv("RABBITMQ_EXCHANGE_NAME")
-	RoutingKey := os.Getenv("RABBITMQ_DLQ_ROUTING_KEY")
-	QueueName := os.Getenv("RABBITMQ_DLQ_NAME")
+	DLX := map[string]interface{}{
+		"x-message-ttl":             10000,
+		"x-dead-letter-exchange":    os.Getenv("RABBITMQ_MESSAGE_EXCHANGE"),
+		"x-dead-letter-routing-key": os.Getenv("RABBITMQ_MESSAGE_QUEUE"),
+	}
 
-	if !queue.QueueMessage(j, exchange, RoutingKey, QueueName) {
+	QueueDeclareProps := entities.QueueProperties{
+		Exchange:   os.Getenv("RABBITMQ_DELAY_MESSAGE_EXCHANGE"),
+		RoutingKey: os.Getenv("RABBITMQ_DELAY_MESSAGE_ROUTING_KEY"),
+		Queue:      os.Getenv("RABBITMQ_DELAY_MESSAGE_QUEUE"),
+		DLX:        DLX,
+	}
+
+	if !queue.QueueMessage(j, QueueDeclareProps) {
 		fmt.Println("Houve um erro na criação da tentativa", message.RetryAttempt, "de envio da mensagem!!")
 		return
 	}

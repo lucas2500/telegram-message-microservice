@@ -3,13 +3,15 @@ package worker
 import (
 	"fmt"
 	"log"
+	"telegram-message-microservice/connections"
 	"telegram-message-microservice/telegram"
 	"telegram-message-microservice/util"
-
-	"github.com/streadway/amqp"
 )
 
-func StartConsumer(conn *amqp.Connection, queue string) {
+func StartConsumer(queue string) {
+
+	// Obtem conexão aberta com o RabbitMQ
+	conn := connections.RabbitConn
 
 	ch, ErrChan := conn.Channel()
 
@@ -49,7 +51,7 @@ func StartConsumer(conn *amqp.Connection, queue string) {
 		}
 	}()
 
-	fmt.Println("Inicializando worker da fila", queue)
+	fmt.Println("Inicializando worker da fila...", queue)
 	log.Printf(" [*] Aguardando novas mensagens...")
 	<-forever
 }

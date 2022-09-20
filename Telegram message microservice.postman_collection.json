@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"BotToken\": \"\",\r\n    \"ChatId\": \"\",\r\n    \"message\": \"teste\",\r\n    \"ParseMode\": \"html\",\r\n    \"RetryAttempt\": 0,\r\n    \"RetryOnError\": true\r\n}",
+					"raw": "{\r\n    \"BotToken\": \"\",\r\n    \"ChatId\": \"\",\r\n    \"message\": \"teste\",\r\n    \"ParseMode\": \"html\",\r\n    \"RetryOnError\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
