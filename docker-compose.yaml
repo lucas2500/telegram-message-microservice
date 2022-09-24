@@ -18,3 +18,4 @@ services:
         image: lucas2500/telegram-msg-ms-api
         depends_on:
             - rabbitmq
+        build: .
