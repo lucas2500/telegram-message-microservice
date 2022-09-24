@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"telegram-message-microservice/util"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -29,6 +30,8 @@ func ConnectToRabbitMQ() *amqp.Connection {
 		if err == nil || counter == 10 {
 			break
 		}
+
+		time.Sleep(5 * time.Second)
 	}
 
 	if err != nil {
