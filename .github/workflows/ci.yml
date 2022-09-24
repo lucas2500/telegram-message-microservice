@@ -29,6 +29,9 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go_version }}
+        
+    - name: build-api
+      run : docker compose build
       
     - name: start-api
       run: docker compose up -d
