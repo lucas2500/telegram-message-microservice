@@ -6,6 +6,15 @@ services:
             - RABBITMQ_DEFAULT_USER=admin
             - RABBITMQ_DEFAULT_PASS=admin
         ports:
-            - '8080:15672'
-            - '5672:5672'
-        image: 'rabbitmq:3-management'
+            - 8080:15672
+            - 5672:5672
+        image: rabbitmq:3-management
+        hostname: rbmq-server
+
+    api:
+        container_name: telegram-msg-ms
+        ports:
+            - 3001:3001
+        image: lucas2500/telegram-msg-ms-api
+        depends_on:
+            - rabbitmq
