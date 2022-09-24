@@ -36,5 +36,5 @@ jobs:
     - name: start-api
       run: docker compose up -d
 
-    - name: Test
+    - name: test
       run: go test -v api_test.go
