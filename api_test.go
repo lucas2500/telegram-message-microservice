@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"telegram-message-microservice/entities"
 	"testing"
 
@@ -11,6 +10,7 @@ import (
 
 func TestEnviaMensagem(t *testing.T) {
 
+	assert := assert.New(t)
 	client := req.C()
 	Retry := false
 
@@ -27,10 +27,12 @@ func TestEnviaMensagem(t *testing.T) {
 		resp, err := client.R().
 			SetBody(body).Post("http://localhost:3001/api/SendMessage")
 
-		if err != nil {
-			log.Fatal(err)
+		// Testa requisição a API
+		if !assert.NoError(err) {
+			return
 		}
 
-		assert.Equal(t, 201, resp.StatusCode)
+		// Testa response da API
+		assert.Equal(201, resp.StatusCode)
 	}
 }
