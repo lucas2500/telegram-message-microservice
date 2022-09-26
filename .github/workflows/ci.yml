@@ -4,13 +4,21 @@ on:
   push:
     branches:
       - master
+      - qa
     paths-ignore:
       - '*.md'
+      - '*.png'
+      - '*.bpm'
+      - '*.json'
   pull_request:
     branches: 
     - master
+    - qa
     paths-ignore:
       - '*.md'
+      - '*.png'
+      - '*.bpm'
+      - '*.json'
 
   # Permite a execução manual da action
   workflow_dispatch:
