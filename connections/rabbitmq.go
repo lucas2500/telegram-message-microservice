@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	Rabbitconn *amqp.Connection
+	RabbitConn *amqp.Connection
 )
 
 func ConnectToRabbitMQ() *amqp.Connection {
@@ -28,7 +28,7 @@ func ConnectToRabbitMQ() *amqp.Connection {
 		fmt.Println("Tentativa", counter, "de conexão!!")
 
 		dsn = "amqp://" + os.Getenv("RABBITMQ_DEFAULT_USER") + ":" + os.Getenv("RABBITMQ_DEFAULT_PASS") + "@" + os.Getenv("RABBITMQ_DEFAULT_HOST") + ":" + os.Getenv("RABBITMQ_DEFAULT_PORT") + os.Getenv("RABBITMQ_DEFAULT_VHOST")
-		Rabbitconn, err = amqp.Dial(dsn)
+		RabbitConn, err = amqp.Dial(dsn)
 
 		if err == nil || counter == 10 {
 			break
@@ -41,5 +41,5 @@ func ConnectToRabbitMQ() *amqp.Connection {
 		util.FailOnError(err, "Falha ao se conectar ao RBMQ")
 	}
 
-	return Rabbitconn
+	return RabbitConn
 }
