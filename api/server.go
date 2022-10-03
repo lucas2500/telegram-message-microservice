@@ -22,8 +22,6 @@ func init() {
 func main() {
 
 	conn := connections.ConnectToRabbitMQ()
-	connections.RabbitConn = conn
-
 	defer conn.Close()
 
 	app := fiber.New()
