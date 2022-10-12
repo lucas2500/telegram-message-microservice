@@ -17,12 +17,13 @@ func init() {
 	if err != nil {
 		util.FailOnError(err, "Falha ao carregar .env")
 	}
+
+	connections.ConnectToRabbitMQ()
 }
 
 func main() {
 
-	conn := connections.ConnectToRabbitMQ()
-	defer conn.Close()
+	defer connections.RabbitConn.Close()
 
 	app := fiber.New()
 	routes.SetupRoutes(app)
