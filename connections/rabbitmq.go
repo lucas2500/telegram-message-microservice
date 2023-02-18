@@ -6,7 +6,7 @@ import (
 	"telegram-message-microservice/util"
 	"time"
 
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 var (
