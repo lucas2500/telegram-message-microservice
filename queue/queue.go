@@ -5,7 +5,7 @@ import (
 	"telegram-message-microservice/entities"
 	"telegram-message-microservice/util"
 
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func QueueMessage(body []byte, qp entities.QueueProperties) bool {
