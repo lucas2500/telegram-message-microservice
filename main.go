@@ -17,15 +17,15 @@ func init() {
 	if err != nil {
 		util.FailOnError(err, "Falha ao carregar .env")
 	}
-
-	conn := connections.ConnectToRabbitMQ()
-
-	defer conn.Close()
 }
 
 func main() {
 
 	var wg sync.WaitGroup
+
+	conn := connections.ConnectToRabbitMQ()
+
+	defer conn.Close()
 
 	Queue := os.Getenv("RABBITMQ_MESSAGE_QUEUE")
 
