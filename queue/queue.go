@@ -1,14 +1,21 @@
 package queue
 
 import (
+	"context"
+	"log"
 	"telegram-message-microservice/connections"
 	"telegram-message-microservice/entities"
 	"telegram-message-microservice/util"
+	"time"
 
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func QueueMessage(body []byte, qp entities.QueueProperties) bool {
+
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+
+	defer cancel()
 
 	// Obtem conexão aberta com o RabbitMQ
 	conn := connections.RabbitConn
@@ -30,7 +37,7 @@ func QueueMessage(body []byte, qp entities.QueueProperties) bool {
 	SetQueueBind(ch, qp.Queue, qp.Exchange, qp.RoutingKey)
 
 	// Publica a mensagem
-	err = ch.Publish(
+	err = ch.PublishWithContext(ctx,
 		qp.Exchange,
 		qp.RoutingKey,
 		false,
@@ -91,4 +98,59 @@ func SetQueueBind(ch *amqp.Channel, queue string, exchange string, RoutingKey st
 	)
 
 	util.FailOnError(err, "Falha ao realizar o bind da exchange com a fila!!")
+}
+
+func DequeueMessage(queue string, message chan amqp.Delivery) {
+
+	// Obtem conexão aberta com o RabbitMQ
+	conn := connections.RabbitConn
+
+	ch, ErrChan := conn.Channel()
+
+	util.FailOnError(ErrChan, "Falha ao abrir canal!!")
+
+	defer ch.Close()
+
+	_, err := ch.QueueDeclare(
+		queue,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	util.FailOnError(err, "Falha ao declarar fila!!")
+
+	// Define a quantidade de mensagens que serão enviadas para o worker
+	// antes da confirmação do recebimento
+	ch.Qos(
+		1,
+		0,
+		true,
+	)
+
+	msgs, err := ch.Consume(
+		queue,
+		"telegram-consumer",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	util.FailOnError(err, "Falha ao registrar consumer!!")
+
+	var forever chan struct{}
+
+	go func() {
+		for d := range msgs {
+			message <- d
+		}
+	}()
+
+	log.Println("Inicializando worker da fila", queue)
+	log.Println(" [*] Aguardando novas mensagens...")
+	<-forever
 }

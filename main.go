@@ -11,6 +11,7 @@ import (
 )
 
 func init() {
+
 	err := godotenv.Load()
 
 	if err != nil {
@@ -21,13 +22,16 @@ func init() {
 func main() {
 
 	var wg sync.WaitGroup
-	Queue := os.Getenv("RABBITMQ_MESSAGE_QUEUE")
+
 	conn := connections.ConnectToRabbitMQ()
-	connections.RabbitConn = conn
 
 	defer conn.Close()
 
+	Queue := os.Getenv("RABBITMQ_MESSAGE_QUEUE")
+
 	wg.Add(1)
+
 	go worker.StartConsumer(Queue)
+
 	wg.Wait()
 }

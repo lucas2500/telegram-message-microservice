@@ -1,12 +1,12 @@
 package connections
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"telegram-message-microservice/util"
 	"time"
 
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 var (
@@ -25,7 +25,7 @@ func ConnectToRabbitMQ() *amqp.Connection {
 
 		counter++
 
-		fmt.Println("Tentativa", counter, "de conexão!!")
+		log.Println("Tentativa", counter, "de conexão!!")
 
 		dsn = "amqp://" + os.Getenv("RABBITMQ_DEFAULT_USER") + ":" + os.Getenv("RABBITMQ_DEFAULT_PASS") + "@" + os.Getenv("RABBITMQ_DEFAULT_HOST") + ":" + os.Getenv("RABBITMQ_DEFAULT_PORT") + os.Getenv("RABBITMQ_DEFAULT_VHOST")
 		RabbitConn, err = amqp.Dial(dsn)
