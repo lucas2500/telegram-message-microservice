@@ -151,7 +151,7 @@ func DequeueMessage(queue string, message chan amqp.Delivery) {
 		}
 	}()
 
-	fmt.Println("Inicializando worker da fila...", queue)
+	fmt.Println("Inicializando worker da fila", queue)
 	log.Printf(" [*] Aguardando novas mensagens...")
 	<-forever
 }
