@@ -2,7 +2,7 @@ package telegram
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"telegram-message-microservice/entities"
@@ -52,18 +52,18 @@ func SendMessageToTelegram(body []byte) {
 	// Case o envio da mensagem falhe e a mensagem esteja parametrizada para reenvio, novas tentativas serão feitas
 	if !success && retry {
 
-		fmt.Println("Houve uma falha na tentativa", message.RetryAttempt, "de envio da mensagem!!")
+		log.Println("Houve uma falha na tentativa", message.RetryAttempt, "de envio da mensagem!!")
 
 		message.RetryAttempt++
 
 		if message.RetryAttempt <= 500 {
 
-			fmt.Println("Criando tentativa", message.RetryAttempt, "de envio da mensagem!!")
+			log.Println("Criando tentativa", message.RetryAttempt, "de envio da mensagem!!")
 			CreateNewMessage(message)
 			return
 		}
 
-		fmt.Println("Número máximo de tentativas excedido!! A mensagem será descartada")
+		log.Println("Número máximo de tentativas excedido!! A mensagem será descartada")
 	}
 }
 
@@ -75,16 +75,16 @@ func RequestTelegramAPI(BotToken string, ChatId string, Text string, ParseMode s
 		"&reply_markup=" + InlineKeyBoard)
 
 	if err != nil {
-		fmt.Println("Erro interno ao enviar mensagem ao Telegram!!")
+		log.Println("Erro interno ao enviar mensagem ao Telegram!!")
 		return false
 	}
 
 	if req.StatusCode == 200 {
-		fmt.Println("Mensagem enviada ao Telegram com sucesso!!")
+		log.Println("Mensagem enviada ao Telegram com sucesso!!")
 		return true
 	}
 
-	fmt.Println("Erro ao enviar mensagem ao Telegram!!", "Status HTTP:", req.StatusCode)
+	log.Println("Erro ao enviar mensagem ao Telegram!!", "Status HTTP:", req.StatusCode)
 
 	return false
 }
@@ -111,9 +111,9 @@ func CreateNewMessage(message entities.Message) {
 	}
 
 	if !queue.QueueMessage(j, QueueDeclareProps) {
-		fmt.Println("Houve um erro na criação da tentativa", message.RetryAttempt, "de envio da mensagem!!")
+		log.Println("Houve um erro na criação da tentativa", message.RetryAttempt, "de envio da mensagem!!")
 		return
 	}
 
-	fmt.Println("Nova tentativa de envio criada com sucesso!!")
+	log.Println("Nova tentativa de envio criada com sucesso!!")
 }

@@ -2,7 +2,6 @@ package queue
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"telegram-message-microservice/connections"
 	"telegram-message-microservice/entities"
@@ -151,7 +150,7 @@ func DequeueMessage(queue string, message chan amqp.Delivery) {
 		}
 	}()
 
-	fmt.Println("Inicializando worker da fila", queue)
-	log.Printf(" [*] Aguardando novas mensagens...")
+	log.Println("Inicializando worker da fila", queue)
+	log.Println(" [*] Aguardando novas mensagens...")
 	<-forever
 }
