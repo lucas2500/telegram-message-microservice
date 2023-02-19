@@ -69,7 +69,10 @@ func SendMessageToTelegram(body []byte) {
 
 func RequestTelegramAPI(BotToken string, ChatId string, Text string, ParseMode string, InlineKeyBoard string) bool {
 
-	req, err := http.Get(os.Getenv("TELEGRAM_BASE_URL") + BotToken + "/" + os.Getenv("TELEGRAM_ROUTE") + "?chat_id=" + ChatId + "&text=" + Text + "&parse_mode=" + ParseMode + "&reply_markup=" + InlineKeyBoard)
+	req, err := http.Get(os.Getenv("TELEGRAM_BASE_URL") +
+		BotToken + "/" + os.Getenv("TELEGRAM_ROUTE") + "?chat_id=" +
+		ChatId + "&text=" + Text + "&parse_mode=" + ParseMode +
+		"&reply_markup=" + InlineKeyBoard)
 
 	if err != nil {
 		fmt.Println("Erro interno ao enviar mensagem ao Telegram!!")
