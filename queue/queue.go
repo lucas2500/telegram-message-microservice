@@ -34,6 +34,7 @@ func (d DeclareQueue) QueueMessage() bool {
 
 	// Abre canal com o broker
 	ch, err := conn.Channel()
+
 	util.FailOnError(err, "Falha ao abrir canal!!")
 
 	// Fecha canal aberto
