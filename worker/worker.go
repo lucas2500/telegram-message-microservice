@@ -12,7 +12,10 @@ import (
 
 func StartConsumer(QueueName string) {
 
-	message := make(chan amqp.Delivery)
+	ConsumerProps := queue.QueueConsumer{
+		Queue:          QueueName,
+		MessageChannel: make(chan amqp.Delivery),
+	}
 
 	WorkersNumber, err := strconv.Atoi(os.Getenv("WORKERS_NUMBER"))
 
@@ -31,11 +34,11 @@ func StartConsumer(QueueName string) {
 		log.Println("Worker", i, "up and running - Queue", QueueName)
 
 		go func() {
-			queue.DequeueMessage(QueueName, message, WorkerId)
+			ConsumerProps.DequeueMessage(WorkerId)
 		}()
 	}
 
-	for msg := range message {
+	for msg := range ConsumerProps.MessageChannel {
 		telegram.SendMessageToTelegram(msg.Body)
 		msg.Ack(true)
 	}
