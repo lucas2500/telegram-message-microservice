@@ -4,14 +4,26 @@ import (
 	"context"
 	"log"
 	"telegram-message-microservice/connections"
-	"telegram-message-microservice/entities"
 	"telegram-message-microservice/util"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func QueueMessage(body []byte, qp entities.QueueProperties) bool {
+type DeclareQueue struct {
+	Exchange   string
+	RoutingKey string
+	Queue      string
+	DLX        map[string]interface{}
+	Body       []byte
+}
+
+type QueueConsumer struct {
+	Queue          string
+	MessageChannel chan amqp.Delivery
+}
+
+func (d DeclareQueue) QueueMessage() bool {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 
@@ -22,29 +34,30 @@ func QueueMessage(body []byte, qp entities.QueueProperties) bool {
 
 	// Abre canal com o broker
 	ch, err := conn.Channel()
+
 	util.FailOnError(err, "Falha ao abrir canal!!")
 
 	// Fecha canal aberto
 	defer ch.Close()
 
 	// Declara exchange
-	SetExchange(ch, qp.Exchange)
+	SetExchange(ch, d.Exchange)
 
 	// Declara fila
-	SetQueue(ch, qp.Queue, qp.DLX)
+	SetQueue(ch, d.Queue, d.DLX)
 
 	// Realiza o bind da exchange com a fila
-	SetQueueBind(ch, qp.Queue, qp.Exchange, qp.RoutingKey)
+	SetQueueBind(ch, d.Queue, d.Exchange, d.RoutingKey)
 
 	// Publica a mensagem
 	err = ch.PublishWithContext(ctx,
-		qp.Exchange,
-		qp.RoutingKey,
+		d.Exchange,
+		d.RoutingKey,
 		false,
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body:        body,
+			Body:        d.Body,
 		},
 	)
 
@@ -100,7 +113,7 @@ func SetQueueBind(ch *amqp.Channel, queue string, exchange string, RoutingKey st
 	util.FailOnError(err, "Falha ao realizar o bind da exchange com a fila!!")
 }
 
-func DequeueMessage(queue string, message chan amqp.Delivery) {
+func (q QueueConsumer) DequeueMessage(WorkerId int) {
 
 	// Obtem conexão aberta com o RabbitMQ
 	conn := connections.RabbitConn
@@ -112,7 +125,7 @@ func DequeueMessage(queue string, message chan amqp.Delivery) {
 	defer ch.Close()
 
 	_, err := ch.QueueDeclare(
-		queue,
+		q.Queue,
 		true,
 		false,
 		false,
@@ -131,7 +144,7 @@ func DequeueMessage(queue string, message chan amqp.Delivery) {
 	)
 
 	msgs, err := ch.Consume(
-		queue,
+		q.Queue,
 		"telegram-consumer",
 		false,
 		false,
@@ -146,11 +159,10 @@ func DequeueMessage(queue string, message chan amqp.Delivery) {
 
 	go func() {
 		for d := range msgs {
-			message <- d
+			log.Println("Worker", WorkerId, "consumindo mensagem")
+			q.MessageChannel <- d
 		}
 	}()
 
-	log.Println("Inicializando worker da fila", queue)
-	log.Println(" [*] Aguardando novas mensagens...")
 	<-forever
 }

@@ -23,13 +23,14 @@ func SendMessage(c *fiber.Ctx) error {
 		return c.Status(400).JSON(response)
 	}
 
-	QueueDeclareProps := entities.QueueProperties{
+	QueueProps := queue.DeclareQueue{
 		Exchange:   os.Getenv("RABBITMQ_MESSAGE_EXCHANGE"),
 		RoutingKey: os.Getenv("RABBITMQ_MESSAGE_QUEUE_ROUTING_KEY"),
 		Queue:      os.Getenv("RABBITMQ_MESSAGE_QUEUE"),
+		Body:       c.Body(),
 	}
 
-	if !queue.QueueMessage(c.Body(), QueueDeclareProps) {
+	if !QueueProps.QueueMessage() {
 		response := map[string]string{"result": "Houve eum erro ao inserir a mensagem na fila!!"}
 		return c.Status(500).JSON(response)
 	}
