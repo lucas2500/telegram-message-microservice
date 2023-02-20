@@ -14,7 +14,8 @@ Um microserviço para envio de mensagens ao Telegram escrito em Golang (Fiber Fr
 **RABBITMQ_EXCHANGE_NAME**: Nome da exchange\
 **RABBITMQ_QUEUE_ROUTING_KEY**: Nome da routing key\
 **TELEGRAM_BASE_URL**: Base URL da API do Telegram\
-**TELEGRAM_ROUTE**: Rota da API do Telegram para envio de mensagens
+**TELEGRAM_ROUTE**: Rota da API do Telegram para envio de mensagens\
+**WORKERS_NUMBER**: Total de workers que serão instanciados para processar as mensagens
 
 #
 
