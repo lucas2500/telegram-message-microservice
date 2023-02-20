@@ -103,14 +103,15 @@ func CreateNewMessage(message entities.Message) {
 		"x-dead-letter-routing-key": os.Getenv("RABBITMQ_MESSAGE_QUEUE"),
 	}
 
-	QueueDeclareProps := entities.QueueProperties{
+	QueuePros := queue.DeclareQueue{
 		Exchange:   os.Getenv("RABBITMQ_DELAY_MESSAGE_EXCHANGE"),
 		RoutingKey: os.Getenv("RABBITMQ_DELAY_MESSAGE_ROUTING_KEY"),
 		Queue:      os.Getenv("RABBITMQ_DELAY_MESSAGE_QUEUE"),
 		DLX:        DLX,
+		Body:       j,
 	}
 
-	if !queue.QueueMessage(j, QueueDeclareProps) {
+	if !QueuePros.QueueMessage() {
 		log.Println("Houve um erro na criação da tentativa", message.RetryAttempt, "de envio da mensagem!!")
 		return
 	}

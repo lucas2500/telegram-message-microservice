@@ -1,12 +1,5 @@
 package entities
 
-type QueueProperties struct {
-	Exchange   string
-	RoutingKey string
-	Queue      string
-	DLX        map[string]interface{}
-}
-
 type Message struct {
 	BotToken       string `json:"BotToken"`
 	ChatId         string `json:"ChatId"`
