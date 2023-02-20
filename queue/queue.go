@@ -100,7 +100,7 @@ func SetQueueBind(ch *amqp.Channel, queue string, exchange string, RoutingKey st
 	util.FailOnError(err, "Falha ao realizar o bind da exchange com a fila!!")
 }
 
-func DequeueMessage(queue string, message chan amqp.Delivery) {
+func DequeueMessage(queue string, message chan amqp.Delivery, WorkerId int) {
 
 	// Obtem conexão aberta com o RabbitMQ
 	conn := connections.RabbitConn
@@ -146,11 +146,10 @@ func DequeueMessage(queue string, message chan amqp.Delivery) {
 
 	go func() {
 		for d := range msgs {
+			log.Println("Worker", WorkerId, "consumindo mensagem")
 			message <- d
 		}
 	}()
 
-	log.Println("Inicializando worker da fila", queue)
-	log.Println(" [*] Aguardando novas mensagens...")
 	<-forever
 }

@@ -1,6 +1,9 @@
 package worker
 
 import (
+	"log"
+	"os"
+	"strconv"
 	"telegram-message-microservice/queue"
 	"telegram-message-microservice/telegram"
 
@@ -11,9 +14,26 @@ func StartConsumer(QueueName string) {
 
 	message := make(chan amqp.Delivery)
 
-	go func() {
-		queue.DequeueMessage(QueueName, message)
-	}()
+	WorkersNumber, err := strconv.Atoi(os.Getenv("WORKERS_NUMBER"))
+
+	if err != nil {
+		log.Fatal("Erro ao carregar configuração do worker")
+	}
+
+	if WorkersNumber <= 0 {
+		WorkersNumber = 1
+	}
+
+	for i := 0; i < WorkersNumber; i++ {
+
+		WorkerId := i
+
+		log.Println("Worker", i, "up and running - Queue", QueueName)
+
+		go func() {
+			queue.DequeueMessage(QueueName, message, WorkerId)
+		}()
+	}
 
 	for msg := range message {
 		telegram.SendMessageToTelegram(msg.Body)
