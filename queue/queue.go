@@ -23,7 +23,7 @@ type QueueConsumer struct {
 	MessageChannel chan amqp.Delivery
 }
 
-func (d QueueProperties) QueueMessage() bool {
+func (q QueueProperties) QueueMessage() bool {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 
@@ -34,29 +34,30 @@ func (d QueueProperties) QueueMessage() bool {
 
 	// Abre canal com o broker
 	ch, err := conn.Channel()
+
 	util.FailOnError(err, "Falha ao abrir canal!!")
 
 	// Fecha canal aberto
 	defer ch.Close()
 
 	// Declara exchange
-	SetExchange(ch, d.Exchange)
+	q.SetExchange(ch)
 
 	// Declara fila
-	SetQueue(ch, d.Queue, d.DLX)
+	q.SetExchange(ch)
 
 	// Realiza o bind da exchange com a fila
-	SetQueueBind(ch, d.Queue, d.Exchange, d.RoutingKey)
+	q.SetQueueBind(ch)
 
 	// Publica a mensagem
 	err = ch.PublishWithContext(ctx,
-		d.Exchange,
-		d.RoutingKey,
+		q.Exchange,
+		q.RoutingKey,
 		false,
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body:        d.Body,
+			Body:        q.Body,
 		},
 	)
 
@@ -68,10 +69,10 @@ func (d QueueProperties) QueueMessage() bool {
 	return true
 }
 
-func SetExchange(ch *amqp.Channel, exchange string) {
+func (q QueueProperties) SetExchange(ch *amqp.Channel) {
 
 	err := ch.ExchangeDeclare(
-		exchange,
+		q.Exchange,
 		"direct",
 		true,
 		false,
@@ -83,28 +84,28 @@ func SetExchange(ch *amqp.Channel, exchange string) {
 	util.FailOnError(err, "Falha ao declarar exchange!!")
 }
 
-func SetQueue(ch *amqp.Channel, queue string, DLX map[string]interface{}) string {
+func (q QueueProperties) SetQueue(ch *amqp.Channel) string {
 
-	q, err := ch.QueueDeclare(
-		queue,
+	queue, err := ch.QueueDeclare(
+		q.Queue,
 		true,
 		false,
 		false,
 		false,
-		DLX,
+		q.DLX,
 	)
 
 	util.FailOnError(err, "Falha ao declarar fila!!")
 
-	return q.Name
+	return queue.Name
 }
 
-func SetQueueBind(ch *amqp.Channel, queue string, exchange string, RoutingKey string) {
+func (q QueueProperties) SetQueueBind(ch *amqp.Channel) {
 
 	err := ch.QueueBind(
-		queue,
-		RoutingKey,
-		exchange,
+		q.Queue,
+		q.RoutingKey,
+		q.Exchange,
 		false,
 		nil,
 	)
