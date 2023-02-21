@@ -103,7 +103,7 @@ func CreateNewMessage(message entities.Message) {
 		"x-dead-letter-routing-key": os.Getenv("RABBITMQ_MESSAGE_QUEUE"),
 	}
 
-	QueuePros := queue.DeclareQueue{
+	QueuePros := queue.QueueProperties{
 		Exchange:   os.Getenv("RABBITMQ_DELAY_MESSAGE_EXCHANGE"),
 		RoutingKey: os.Getenv("RABBITMQ_DELAY_MESSAGE_ROUTING_KEY"),
 		Queue:      os.Getenv("RABBITMQ_DELAY_MESSAGE_QUEUE"),

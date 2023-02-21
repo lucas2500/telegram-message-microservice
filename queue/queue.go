@@ -10,7 +10,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type DeclareQueue struct {
+type QueueProperties struct {
 	Exchange   string
 	RoutingKey string
 	Queue      string
@@ -23,7 +23,7 @@ type QueueConsumer struct {
 	MessageChannel chan amqp.Delivery
 }
 
-func (d DeclareQueue) QueueMessage() bool {
+func (d QueueProperties) QueueMessage() bool {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 

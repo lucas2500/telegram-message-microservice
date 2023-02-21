@@ -23,7 +23,7 @@ func SendMessage(c *fiber.Ctx) error {
 		return c.Status(400).JSON(response)
 	}
 
-	QueueProps := queue.DeclareQueue{
+	QueueProps := queue.QueueProperties{
 		Exchange:   os.Getenv("RABBITMQ_MESSAGE_EXCHANGE"),
 		RoutingKey: os.Getenv("RABBITMQ_MESSAGE_QUEUE_ROUTING_KEY"),
 		Queue:      os.Getenv("RABBITMQ_MESSAGE_QUEUE"),
