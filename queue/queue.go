@@ -44,7 +44,7 @@ func (q QueueProperties) QueueMessage() bool {
 	q.SetExchange(ch)
 
 	// Declara fila
-	q.SetExchange(ch)
+	q.SetQueue(ch)
 
 	// Realiza o bind da exchange com a fila
 	q.SetQueueBind(ch)
